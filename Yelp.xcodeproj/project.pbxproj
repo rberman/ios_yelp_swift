@@ -21,6 +21,7 @@
 		DDD95E301F747643004018CE /* SwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD95E2F1F747642004018CE /* SwitchCell.swift */; };
 		DDD95E321F7477B7004018CE /* FiltersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD95E311F7477B7004018CE /* FiltersViewController.swift */; };
 		DDD95E341F780502004018CE /* InfiniteScrollActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD95E331F780502004018CE /* InfiniteScrollActivityView.swift */; };
+		DDD95E361F780E81004018CE /* CheckCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD95E351F780E81004018CE /* CheckCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		DDD95E2F1F747642004018CE /* SwitchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchCell.swift; sourceTree = "<group>"; };
 		DDD95E311F7477B7004018CE /* FiltersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FiltersViewController.swift; sourceTree = "<group>"; };
 		DDD95E331F780502004018CE /* InfiniteScrollActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfiniteScrollActivityView.swift; sourceTree = "<group>"; };
+		DDD95E351F780E81004018CE /* CheckCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckCell.swift; sourceTree = "<group>"; };
 		EF53DC2D7A8303A68532E7C6 /* Pods-Yelp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Yelp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Yelp/Pods-Yelp.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -181,6 +183,7 @@
 				DD3316531F732C3000712CF8 /* BusinessCell.swift */,
 				DDD95E2F1F747642004018CE /* SwitchCell.swift */,
 				DDD95E331F780502004018CE /* InfiniteScrollActivityView.swift */,
+				DDD95E351F780E81004018CE /* CheckCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -402,6 +405,7 @@
 				DDD95E341F780502004018CE /* InfiniteScrollActivityView.swift in Sources */,
 				DD3316541F732C3000712CF8 /* BusinessCell.swift in Sources */,
 				22AAAA9C1AEA1EC300A544AF /* BusinessesViewController.swift in Sources */,
+				DDD95E361F780E81004018CE /* CheckCell.swift in Sources */,
 				DDD95E321F7477B7004018CE /* FiltersViewController.swift in Sources */,
 				22AAAA991AEA0A9700A544AF /* Business.swift in Sources */,
 				222D8A7D19CCFAE000D2DB53 /* YelpClient.swift in Sources */,

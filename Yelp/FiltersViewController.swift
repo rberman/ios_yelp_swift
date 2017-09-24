@@ -18,12 +18,27 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
 
   weak var delegate: FiltersViewControllerDelegate?
 
-  private let sections = ["Deals", "Distance", "Sort By", "Category"]
-  private var settings = [(String, [[String:String]])]()
-  private var switchStates = [Int:[Int:Bool]]()
+  private enum Section: Int {
+    case deals = 0, distance, sortBy, category
+  }
+  private var sectionDetails = [SectionDetails]()
+  struct SectionDetails {
+    var name: String
+    var collapsed: Bool
+    var isCollapsible: Bool
+    var settings: [[String:String]]
+
+    init(name: String, collapsed: Bool = false, isCollapsible: Bool, settings: [[String:String]]) {
+      self.name = name
+      self.collapsed = collapsed
+      self.isCollapsible = isCollapsible
+      self.settings = settings
+    }
+  }
+
   private var dealsSwitchState: Bool = false
-  private var distanceSwitchState: Double = 5.0
-  private var sortedBySwitchState: YelpSortMode = YelpSortMode.bestMatched
+  private var distanceSwitchState: Double? = nil
+  private var sortedBySwitchState: YelpSortMode? = nil
   private var categorySwitchStates = [Int:Bool]()
 
   override func viewDidLoad() {
@@ -32,10 +47,12 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
     tableView.dataSource = self
     tableView.delegate = self
 
-    settings.append((sections[0], yelpDeals()))
-    settings.append((sections[1], yelpDistance()))
-    settings.append((sections[2], yelpSortBy()))
-    settings.append((sections[3], yelpCategories()))
+    sectionDetails = [
+      SectionDetails(name: "Deals", isCollapsible: false, settings: yelpDeals()),
+      SectionDetails(name: "Distance", isCollapsible: true, settings: yelpDistance()),
+      SectionDetails(name: "Sort By", isCollapsible: true, settings: yelpSortBy()),
+      SectionDetails(name: "Category", isCollapsible: false, settings: yelpCategories()),
+    ]
 
     // Do any additional setup after loading the view.
   }
@@ -45,90 +62,78 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
     // Dispose of any resources that can be recreated.
   }
 
-  @IBAction func cancelButtonTapped(_ sender: Any) {
+  @IBAction private func cancelButtonTapped(_ sender: Any) {
     dismiss(animated: true, completion: nil)
   }
 
-  @IBAction func searchButtonTapped(_ sender: Any) {
+  @IBAction private func searchButtonTapped(_ sender: Any) {
     var filters = [String:AnyObject]()
-/*
-    for (section, selections) in switchStates {
-      var selectedOptions = [String]()
-      for (option, isSelected) in selections {
-        if isSelected {
-          selectedOptions.append(settings[section].1[option]["code"]!)
-        }
-      }
-      if selectedOptions.count > 0 {
-        let settingName = settings[section].0
-        filters[settingName] = selectedOptions
-      }
-    }
-*/
-    filters["deals"] = dealsSwitchState as AnyObject
-    filters["sortBy"] = sortedBySwitchState as AnyObject
 
-    let milesPerMeter = 0.000621371
-    let distanceInMeters = distanceSwitchState / milesPerMeter
-    filters["distance"] = distanceInMeters as AnyObject
+    filters["deals"] = dealsSwitchState as AnyObject
+
+    if distanceSwitchState != nil {
+      let metersPerMile = 1609.34
+      let distanceInMeters = distanceSwitchState! * metersPerMile
+      filters["distance"] = distanceInMeters as AnyObject
+    }
+
+    if sortedBySwitchState != nil {
+      filters["sortBy"] = sortedBySwitchState as AnyObject
+    }
 
     var selectedCategories = [String]()
     for (row, isSelected) in categorySwitchStates {
       if isSelected {
-        selectedCategories.append(settings[3].1[row]["code"]!)
+        selectedCategories.append(sectionDetails[Section.category.rawValue].settings[row]["code"]!)
       }
     }
+
     if selectedCategories.count > 0 {
       filters["categories"] = selectedCategories as AnyObject
     }
 
-    print(filters)
     delegate?.filtersViewController!(filtersViewController: self, didUpdateFilters: filters)
     dismiss(animated: true, completion: nil)
   }
 
   func numberOfSections(in tableView: UITableView) -> Int {
-    return settings.count
+    return sectionDetails.count
   }
 
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return settings[section].1.count
+    return sectionDetails[section].settings.count
   }
 
   func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    return settings[section].0
+    if section == Section.deals.rawValue {
+      return " "
+    }
+    return sectionDetails[section].name
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
-    cell.switchLabel.text = settings[indexPath.section].1[indexPath.row]["name"]
-    cell.delegate = self
-    cell.onSwitch.isOn = switchStates[indexPath.section]?[indexPath.row] ?? false
-    return cell
-  }
-
-  private func turnOffAllSwitchesInSection(section: Int, exceptRow: Int?) {
-    for row in 0 ..< tableView.numberOfRows(inSection: section) {
-      if exceptRow == row {
-        continue
+    if indexPath.section == Section.deals.rawValue || indexPath.section == Section.category.rawValue {
+      let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
+      cell.switchLabel.text = sectionDetails[indexPath.section].settings[indexPath.row]["name"]
+      cell.delegate = self
+      if indexPath.section == Section.category.rawValue {
+        cell.onSwitch.isOn = categorySwitchStates[indexPath.row] ?? false
       }
-      let cell = tableView.cellForRow(at: [section, row]) as! SwitchCell
-      cell.onSwitch.isOn = false
+      return cell
+    } else {
+      let cell = tableView.dequeueReusableCell(withIdentifier: "CheckCell", for: indexPath) as! CheckCell
+      cell.checkLabel.text = sectionDetails[indexPath.section].settings[indexPath.row]["name"]
+      return cell
     }
   }
 
-  func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
-    let indexPath = tableView.indexPath(for: switchCell)!
-    if switchStates[indexPath.section] == nil {
-      switchStates[indexPath.section] = [Int:Bool]()
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    if indexPath.section == Section.distance.rawValue || indexPath.section == Section.sortBy.rawValue {
+      let cell = tableView.cellForRow(at: indexPath)
+      cell?.accessoryType = .checkmark
+      deselectCheckedCells(section: indexPath.section, exceptRow: indexPath.row)
     }
-    switchStates[indexPath.section]?[indexPath.row] = value
-
-    switch indexPath.section {
-    case 0: // Deals
-      dealsSwitchState = value
-    case 1: // Distance
-      turnOffAllSwitchesInSection(section: indexPath.section, exceptRow: indexPath.row)
+    if indexPath.section == Section.distance.rawValue {
       switch indexPath.row {
       case 0:
         distanceSwitchState = 0.3
@@ -141,8 +146,8 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
       default:
         distanceSwitchState = 5.0
       }
-    case 2: // Sort By
-      turnOffAllSwitchesInSection(section: indexPath.section, exceptRow: indexPath.row)
+    }
+    else if indexPath.section == Section.sortBy.rawValue{
       switch indexPath.row {
       case 0:
         sortedBySwitchState = YelpSortMode.bestMatched
@@ -153,10 +158,25 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
       default:
         sortedBySwitchState = YelpSortMode.bestMatched
       }
-    case 3: // Categories
+    }
+  }
+
+  private func deselectCheckedCells(section: Int, exceptRow: Int?) {
+    for row in 0 ..< tableView.numberOfRows(inSection: section) {
+      if exceptRow == row {
+        continue
+      }
+      let cell = tableView.cellForRow(at: [section, row]) as! CheckCell
+      cell.accessoryType = .none
+    }
+  }
+
+  func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
+    let indexPath = tableView.indexPath(for: switchCell)!
+    if indexPath.section == Section.deals.rawValue {
+      dealsSwitchState = value
+    } else if indexPath.section == Section.category.rawValue {
       categorySwitchStates[indexPath.row] = value
-    default:
-      return
     }
   }
 

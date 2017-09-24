@@ -186,6 +186,29 @@
                                             <outlet property="switchLabel" destination="0GL-cr-bNt" id="R2I-ky-TIL"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="CheckCell" id="WtS-ca-iKM" customClass="CheckCell" customModule="Yelp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="80" width="375" height="52"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="WtS-ca-iKM" id="M4K-zL-xZH">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="51.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QsO-zO-OM0">
+                                                    <rect key="frame" x="20" y="12" width="42" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="QsO-zO-OM0" firstAttribute="top" secondItem="M4K-zL-xZH" secondAttribute="top" constant="12" id="1Eh-wo-4Ed"/>
+                                                <constraint firstItem="QsO-zO-OM0" firstAttribute="leading" secondItem="M4K-zL-xZH" secondAttribute="leading" constant="20" id="peP-9r-km6"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="checkLabel" destination="QsO-zO-OM0" id="xB7-OX-PXA"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </prototypes>
                             </tableView>
                         </subviews>
