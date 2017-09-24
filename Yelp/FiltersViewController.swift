@@ -12,6 +12,8 @@ import UIKit
   @objc optional func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String:AnyObject])
 }
 
+
+
 class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, SwitchCellDelegate {
 
   @IBOutlet weak var tableView: UITableView!
@@ -46,11 +48,13 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
 
     tableView.dataSource = self
     tableView.delegate = self
+    self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
+    self.tableView.estimatedSectionHeaderHeight = 50;
 
     sectionDetails = [
       SectionDetails(name: "Deals", isCollapsible: false, settings: yelpDeals()),
-      SectionDetails(name: "Distance", isCollapsible: true, settings: yelpDistance()),
-      SectionDetails(name: "Sort By", isCollapsible: true, settings: yelpSortBy()),
+      SectionDetails(name: "Distance", collapsed: true, isCollapsible: true, settings: yelpDistance()),
+      SectionDetails(name: "Sort By", collapsed: true, isCollapsible: true, settings: yelpSortBy()),
       SectionDetails(name: "Category", isCollapsible: false, settings: yelpCategories()),
     ]
 
@@ -101,20 +105,39 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
   }
 
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return sectionDetails[section].settings.count
+    if sectionDetails[section].isCollapsible && sectionDetails[section].collapsed {
+      return 0
+    } else {
+      return sectionDetails[section].settings.count
+    }
   }
 
-  func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-    if section == Section.deals.rawValue {
-      return " "
+  func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    let headerCell = tableView.dequeueReusableCell(withIdentifier: "HeaderCell") as! HeaderCell
+    headerCell.nameLabel.text = (section == Section.deals.rawValue) ? " " : sectionDetails[section].name
+    headerCell.section = section
+    headerCell.backgroundColor = (section == Section.deals.rawValue) ? headerCell.backgroundColor : UIColor.white
+    headerCell.isUserInteractionEnabled = true
+    headerCell.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(headerCellTapped(_:))))
+    if sectionDetails[section].isCollapsible && sectionDetails[section].collapsed{
+      headerCell.accessoryType = .disclosureIndicator
     }
-    return sectionDetails[section].name
+    return headerCell
+  }
+
+  func headerCellTapped(_ sender: UITapGestureRecognizer) {
+    let headerCell = sender.view as! HeaderCell
+    headerCell.accessoryType = .checkmark
+    let sectionIsCollapsed = sectionDetails[headerCell.section].collapsed
+    sectionDetails[headerCell.section].collapsed = !sectionIsCollapsed
+    tableView.reloadData()
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     if indexPath.section == Section.deals.rawValue || indexPath.section == Section.category.rawValue {
       let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
       cell.switchLabel.text = sectionDetails[indexPath.section].settings[indexPath.row]["name"]
+      cell.onSwitch.isOn = false
       cell.delegate = self
       if indexPath.section == Section.category.rawValue {
         cell.onSwitch.isOn = categorySwitchStates[indexPath.row] ?? false
